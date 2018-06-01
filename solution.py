@@ -8,22 +8,44 @@ class Solution:
         self.flows = np.array(fs)
         self._cost = None
 
+    def cityCosts(self, a, b):
+        city_costs = 0
+
+        for i in xrange(0, self.n):
+            if i != a:
+                city_costs += self.distances[a][i] * self.flows[a][i]
+            if i != b:
+                city_costs += self.distances[b][i] * self.flows[b][i]
+
+        city_costs -= self.distances[a][b] * self.flows[a][b]
+
+        return city_costs
+
     def exchangeFacilities(self, a, b):
+        old_city_costs = self.cityCosts(a, b)
+        old_cost = self.cost
+
         swapRows(self.flows, a, b)
         swapColumns(self.flows, a, b)
+
+        new_city_costs = self.cityCosts(a, b)
+        self._cost = old_cost + new_city_costs - old_city_costs
+
+    def new_cost(self):
+        cost_acc = 0
+
+        for i in xrange(0, self.n):
+            for j in xrange(i+1, self.n):
+                cost_acc += self.distances[i][j] * self.flows[i][j]
+
+        return cost_acc
 
     @property
     def cost(self):
         if self._cost:
             return self._cost
 
-        cost_acc = 0
-
-        for i in xrange(0,self.n):
-            for j in xrange(0,self.n):
-                cost_acc += self.distances[i][j] * self.flows[i][j]
-
-        self._cost = cost_acc
+        self._cost = self.new_cost()
 
         return self._cost
 
