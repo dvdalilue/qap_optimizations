@@ -42,6 +42,13 @@ class Solution:
 
         return cost_acc
 
+    def copy(self):
+        aux = Solution(self.n, self.distances, self.flows.copy())
+        aux.cost = self.cost
+        aux.permutation = self.permutation.copy()
+
+        return aux
+
     @property
     def cost(self):
         if self._cost:
