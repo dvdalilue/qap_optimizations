@@ -1,57 +1,83 @@
 import random
 import operator
+import itertools
+
 import local_search as local
 from solution import Solution
 
+a_random = random.SystemRandom()
+
 def crossover(parent_1, parent_2):
-    a_random = random.SystemRandom()
-
     n = parent_1.n # == parent_2.n
-    d = parent_1.distances # == parent_2.distances
 
-    offspring_1 = Solution(n, d, parent_1.flows.copy())
-    offspring_2 = Solution(n, d, parent_2.flows.copy())
+    offspring_1 = parent_1.copy()
+    offspring_2 = parent_2.copy()
 
-    random_parents_facilities = [[],[]]
-
-    # n_unequal = 0
+    unequal_facilities = [[],[]]
 
     for i in xrange(0, n):
-        for j in xrange(i+1, n):
-            if offspring_1.flows[i][j] != offspring_2.flows[i][j]:
-                # n_unequal += 1
-                random_parents_facilities[0].append(offspring_1.flows[i][j])
-                random_parents_facilities[1].append(offspring_2.flows[i][j])
+        if offspring_1.permutation[i] != offspring_2.permutation[i]:
+            unequal_facilities[0].append(i)
+            unequal_facilities[1].append(i)
 
-    # matrix_size = float(n * n)
-    # equivalence_ratio = (matrix_size - float(n_unequal)) / matrix_size
+    n_unequal = len(unequal_facilities[0]) # == len(unequal_facilities[1])
 
-    random_parents_facilities[0] = random.sample(
-                                    random_parents_facilities[0],
-                                    len(random_parents_facilities[0]))
-    random_parents_facilities[1] = random.sample(
-                                    random_parents_facilities[1],
-                                    len(random_parents_facilities[1]))
+    unequal_facilities[0] = a_random.sample(unequal_facilities[0], n_unequal)
+    unequal_facilities[1] = a_random.sample(unequal_facilities[1], n_unequal)
 
-    for i in xrange(0, n):
-        for j in xrange(i+1, n):
-            if offspring_1.flows[i][j] != offspring_2.flows[i][j]:
-                # Assign random facilities to offspring 1
-                aux_pop = random_parents_facilities[0].pop()
-                offspring_1.flows[i][j] = aux_pop
-                offspring_1.flows[j][i] = aux_pop
-                # Assign random facilities to offspring 2
-                aux_pop = random_parents_facilities[1].pop()
-                offspring_2.flows[i][j] = aux_pop
-                offspring_2.flows[j][i] = aux_pop
+    for i in xrange(0, n_unequal-1, 2):
+        # Assign random facilities to offspring 1
+        offspring_1.exchangeFacilities(
+            unequal_facilities[0][i],
+            unequal_facilities[0][i+1])
+        # Assign random facilities to offspring 2
+        offspring_2.exchangeFacilities(
+            unequal_facilities[1][i],
+            unequal_facilities[1][i+1])
 
     return (offspring_1, offspring_2)
+
+def crossover_mutant(parent_1, parent_2):
+    n = parent_1.n # == parent_2.n
+
+    offspring_1 = parent_1.copy()
+    offspring_2 = parent_2.copy()
+    mutant = parent_1.copy()
+
+    unequal_facilities = [[],[],[]]
+
+    for i in xrange(0, n):
+        if offspring_1.permutation[i] != offspring_2.permutation[i]:
+            unequal_facilities[0].append(i)
+            unequal_facilities[1].append(i)
+
+    n_unequal = len(unequal_facilities[0]) # == len(unequal_facilities[1])
+
+    unequal_facilities[0] = a_random.sample(unequal_facilities[0], n_unequal)
+    unequal_facilities[1] = a_random.sample(unequal_facilities[1], n_unequal)
+    unequal_facilities[2] = a_random.sample(unequal_facilities[1], n_unequal)
+
+    for i in xrange(0, n_unequal-1, 2):
+        # Assign random facilities to offspring 1
+        offspring_1.exchangeFacilities(
+            unequal_facilities[0][i],
+            unequal_facilities[0][i+1])
+        # Assign random facilities to offspring 2
+        offspring_2.exchangeFacilities(
+            unequal_facilities[1][i],
+            unequal_facilities[1][i+1])
+        # Assign random facilities to mutant
+        mutant.exchangeFacilities(
+            unequal_facilities[2][i],
+            unequal_facilities[2][i+1])
+
+    return (offspring_1, offspring_2, mutant)
 
 def genetic(parents, generations):
     n = len(parents)
 
     for i in xrange(0, n):
-        local.search(parents[i], iterations_coeff=1.0)
+        local.search(parents[i], iterations_coeff=30.0)
 
     gen_number = 0
 
@@ -59,16 +85,17 @@ def genetic(parents, generations):
         new_generation = []
 
         for i in xrange(0, n-1):
-            (of1, of2) = crossover(parents[i],parents[i+1])
+            (of1, of2, mut) = crossover_mutant(parents[i],parents[i+1])
 
             new_generation.append(of1)
             new_generation.append(of2)
+            new_generation.append(mut)
 
-        map(local.search, new_generation)
+        map(local.eager_search, new_generation)
 
         new_generation.sort(key=operator.attrgetter('cost'))
 
-        parents = new_generation[:n]
+        parents = a_random.sample(new_generation[:n], n)
         gen_number += 1
 
     return parents
