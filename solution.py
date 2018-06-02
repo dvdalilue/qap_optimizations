@@ -4,6 +4,7 @@ from np_functions import *
 class Solution:
     def __init__(self, n, ds, fs):
         self.n = n
+        self.permutation = np.array(xrange(1,n+1))
         self.distances = np.array(ds)
         self.flows = np.array(fs)
         self._cost = None
@@ -25,6 +26,7 @@ class Solution:
         old_city_costs = self.cityCosts(a, b)
         old_cost = self.cost
 
+        swapColumns(self.permutation, a, b)
         swapRows(self.flows, a, b)
         swapColumns(self.flows, a, b)
 
