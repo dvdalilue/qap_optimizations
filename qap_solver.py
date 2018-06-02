@@ -1,12 +1,17 @@
 #!/usr/bin/python2
 
 import sys
-import os.path
 import random
+import os.path
+import operator
 import numpy as np
 
 from solution import Solution
-import input_processor as Processor
+import evolutionary as evo
+# import local_search as local
+import input_processor as processor
+
+GENERATIONS = 8
 
 def main():
     if len(sys.argv) < 2 or len(sys.argv) > 2:
@@ -17,28 +22,33 @@ def main():
     else:
         sys.exit('Not a file')
 
-    (n, distances, flows) = Processor.processInput(file)
+    (n, distances, flows) = processor.processInput(file)
 
-    solutions = map(lambda (x,y,z): Solution(x,y,z), [(n, distances, flows)] * 100)
+    solutions = map(lambda (x,y,z): Solution(x,y,z), [(n, distances, flows)] * GENERATIONS)
 
-    options = xrange(0,n)
-    secure_random = random.SystemRandom()
+    # solutions = [Solution(n, distances, flows),Solution(n, distances, flows)]
+    
+    # solution = Solution(n, distances, flows)
 
-    aux_sol_cost = None
+    #####################################
+    # solution.exchangeFacilities(0,11) #
+    # solution.exchangeFacilities(1,6)  #
+    # solution.exchangeFacilities(2,8)  #
+    # solution.exchangeFacilities(3,8)  #
+    # solution.exchangeFacilities(4,8)  #
+    # solution.exchangeFacilities(5,7)  #
+    # solution.exchangeFacilities(6,10) #
+    # solution.exchangeFacilities(7,11) #
+    # solution.exchangeFacilities(9,11) #
+    # solution.exchangeFacilities(10,11)#
+    #####################################
+    # print solution.cost # Optimal nug #
+    # print solution.permutation        #
+    #####################################
 
-    for i in xrange(1,100):
-        for _ in xrange(1, int(1.27 * n)):
-            city_1 = random.choice(options)
-            city_2 = random.choice(options)
+    solutions = evo.genetic(solutions, generations=GENERATIONS)
 
-            aux_sol_cost = solutions[i].cost
-
-            solutions[i].exchangeFacilities(city_1, city_2)
-
-            if aux_sol_cost < solutions[i].cost:
-                solutions[i].exchangeFacilities(city_1, city_2)
-
-        print solutions[i].cost
+    print(min(solutions,key=operator.attrgetter('cost')).cost)
 
 if __name__ == "__main__":
     main()
