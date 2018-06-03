@@ -1,5 +1,5 @@
 import numpy as np
-from np_functions import *
+from helper_functions import swapRows, swapColumns, randomOptions
 
 class Solution:
     def __init__(self, n, ds, fs):
@@ -33,6 +33,13 @@ class Solution:
         new_city_costs = self.cityCosts(a, b)
         self._cost = old_cost + new_city_costs - old_city_costs
 
+    def randomize(self, k=1):
+        for i in xrange(0, k):
+            cities = randomOptions(self.n, k=2)
+            self.exchangeFacilities(cities[0], cities[1])
+
+        return self
+
     def new_cost(self):
         cost_acc = 0
 
@@ -44,7 +51,7 @@ class Solution:
 
     def copy(self):
         aux = Solution(self.n, self.distances, self.flows.copy())
-        aux.cost = self.cost
+        aux._cost = self.cost
         aux.permutation = self.permutation.copy()
 
         return aux
