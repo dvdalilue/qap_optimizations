@@ -1,4 +1,6 @@
-# np functions
+# helper functions
+
+import random
 
 def swapRows(matrix, i_1, i_2):
     row_1 = matrix[i_1].copy()
@@ -18,3 +20,17 @@ def equivalenceRatio(a_1, a_2):
             equivalence += 1.0
 
     return (equivalence / float(n))
+
+def randomOptions(n, k=1):
+    options = xrange(0, n)
+    a_random = random.SystemRandom()
+
+    if k == 1:
+        return a_random.choice(options)
+
+    r = []
+
+    for _ in xrange(0, k):
+        r.append(a_random.choice(options))
+
+    return r
