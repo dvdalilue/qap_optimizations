@@ -1,6 +1,5 @@
 import random
 import operator
-import itertools
 
 import local_search as local
 from solution import Solution
@@ -73,11 +72,8 @@ def crossover_mutant(parent_1, parent_2):
 
     return (offspring_1, offspring_2, mutant)
 
-def genetic(parents, generations):
+def genetic(parents, generations, local_s):
     n = len(parents)
-
-    for i in xrange(0, n):
-        local.search(parents[i], iterations_coeff=30.0)
 
     gen_number = 0
 
@@ -91,7 +87,7 @@ def genetic(parents, generations):
             new_generation.append(of2)
             new_generation.append(mut)
 
-        map(local.eager_search, new_generation)
+        map(local_s, new_generation)
 
         new_generation.sort(key=operator.attrgetter('cost'))
 
