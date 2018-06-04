@@ -3,8 +3,8 @@ import random
 
 from helper_functions import randomOptions
 
-LOCAL_SEARCH_COEFFICIENT = 5.27
-ANNEALING_TEMPERATURE_FACTOR = 1000
+LOCAL_SEARCH_COEFFICIENT = 18.76
+ANNEALING_TEMPERATURE_FACTOR = 1000000
 
 def eager_search(sln, iterations_coeff=LOCAL_SEARCH_COEFFICIENT):
     crnt_it = 0.0
@@ -29,16 +29,13 @@ def eager_search(sln, iterations_coeff=LOCAL_SEARCH_COEFFICIENT):
 
     return sln
 
-def annealing(sln):
-    t_max = math.floor(sln.n * ANNEALING_TEMPERATURE_FACTOR)
+def annealing(sln, t_max=ANNEALING_TEMPERATURE_FACTOR):
     t = t_max
-    s_cost = sln.cost
+    k = 0.0
 
     while t > 0.0:
         aux_sln = sln.copy()
-        aux_sln.randomize(int(aux_sln.n * (t / t_max)))
-
-        # search(aux_sln, 0.8)
+        aux_sln.randomize(sln.n if t > sln.n else int(t))
 
         diff_cost = sln.cost - aux_sln.cost
 
@@ -49,7 +46,8 @@ def annealing(sln):
             sln.cost = aux_sln.cost
 
         del aux_sln
-        t = math.floor(0.73 * t)
+        k += 1.0
+        t = math.floor(t_max / (1.0 + 300000.0 * math.log10(1 + k)))
 
     return sln
 
