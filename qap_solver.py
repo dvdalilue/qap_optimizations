@@ -4,6 +4,7 @@ import sys
 import math
 import os.path
 import operator
+from time import time
 
 from solution import Solution
 import evolutionary as evo
@@ -18,7 +19,6 @@ ils = lambda x: local.eager_search(x, 1)
 sa = lambda x: local.annealing(x,1050500)
 
 def timereps(slns, ls):
-    from time import time
     start = time()
     slns = evo.genetic(slns,GENERATIONS,ls)
     end = time()
@@ -26,18 +26,24 @@ def timereps(slns, ls):
 
 def run_ls(n, distances, flows, coeff):
     solution = Solution(n, distances, flows)
+    start = time()
     local.search(solution, coeff)
-    return solution
+    end = time()
+    return (solution, end - start)
 
 def run_sa(n, distances, flows, temp):
     solution = Solution(n, distances, flows)
+    start = time()
     local.annealing(solution, temp)
-    return solution
+    end = time()
+    return (solution, end - start)
 
 def run_ils(n, distances, flows, coeff):
     solution = Solution(n, distances, flows)
+    start = time()
     local.eager_search(solution, coeff)
-    return solution
+    end = time()
+    return (solution, end - start)
 
 def run_evo(n, distances, flows, generations=GENERATIONS):
     print 's1, s2, s3, t1, t2, t3'
@@ -84,14 +90,14 @@ def main():
     (n, distances, flows) = processor.processInput(file)
 
     if sys.argv[1] == 'ls':
-        sln = run_ls(n, distances, flows, int(sys.argv[2]))
-        print sln.cost
+        (sln, t) = run_ls(n, distances, flows, int(sys.argv[2]))
+        print sln.cost, t
     elif sys.argv[1] == 'sa':
-        sln = run_sa(n, distances, flows, int(sys.argv[2]))
-        print sln.cost
+        (sln, t) = run_sa(n, distances, flows, int(sys.argv[2]))
+        print sln.cost, t
     elif sys.argv[1] == 'ils':
-        sln = run_ils(n, distances, flows, int(sys.argv[2]))
-        print sln.cost
+        (sln, t) = run_ils(n, distances, flows, int(sys.argv[2]))
+        print sln.cost, t
     elif sys.argv[1] == 'evo':
         sln = run_evo(n, distances, flows ,int(sys.argv[2]))
 
